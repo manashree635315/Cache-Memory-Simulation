@@ -1,7 +1,7 @@
 module cache;
     //blockOffset = no of bits of block offset 
     //way_no - decimal, set_no_bits - taking bits cuz we assume log(set_no) = integer in base 2
-    parameter blockOffset_bits = 3, input_way_no = 4, set_no_bits=3, no_of_requests = 9075;//blockOffset in number of bits format
+    parameter blockOffset_bits = 3, input_way_no = 4, set_no_bits = 3, no_of_requests = 524;//blockOffset in number of bits format
     
     reg hit; //1 - current request is hit; 0 - current request is a miss
     reg [23: 0] address; //address accessed by current request
@@ -29,10 +29,11 @@ module cache;
     reg requests_loaded = 1'b0;//tells if requests have been read from our trace 
     integer file, line_num, a; // for reading from memory file
     reg [24:0] all_queries [0: (no_of_requests - 1)]; //query size = bool + address (24 bit))
-    
+    reg whichAlwaysBlocksToCall [15:0];
+
     //reading requests
     initial begin
-        file = $fopen("binary_instruction.txt", "r"); //TODO: change name of file
+        file = $fopen("sort.txt", "r"); //TODO: change name of file
         line_num = 0;
         while(! $feof(file))
             begin
@@ -42,6 +43,10 @@ module cache;
             end 
         requests_loaded=1'b1;
         hit=1'b0;
+        for (integer x = 0; x < 16; x = x + 1) 
+        begin
+            whichAlwaysBlocksToCall[x] = 1'b0;
+        end
     end
 
     //code to read each request
@@ -80,23 +85,172 @@ module cache;
         processRequest = 1'b0;
         callDecode <= DecodeUnit(request_num);
         bhatia_on = 1'b1;
+        for (integer i = 0; i < input_way_no; i = i + 1)
+        begin
+            whichAlwaysBlocksToCall[i] = 1'b1;
+        end 
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[0] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][0][tag_size: 1] && cache_overhead[setNumber][0][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 0;
+        end
+        counter_variable_bool = 1'b1;
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[1] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][1][tag_size: 1] && cache_overhead[setNumber][1][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 1;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[2] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][2][tag_size: 1] && cache_overhead[setNumber][2][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 2;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[3] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][3][tag_size: 1] && cache_overhead[setNumber][3][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 3;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[4] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][4][tag_size: 1] && cache_overhead[setNumber][4][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 4;
+        end
+    end
+
+always @(posedge (whichAlwaysBlocksToCall[5] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][5][tag_size: 1] && cache_overhead[setNumber][5][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 5;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[6] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][6][tag_size: 1] && cache_overhead[setNumber][6][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 6;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[7] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][7][tag_size: 1] && cache_overhead[setNumber][7][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 7;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[8] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][8][tag_size: 1] && cache_overhead[setNumber][8][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 8;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[9] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][9][tag_size: 1] && cache_overhead[setNumber][9][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 9;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[10] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][10][tag_size: 1] && cache_overhead[setNumber][10][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 10;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[11] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][11][tag_size: 1] && cache_overhead[setNumber][11][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 11;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[12] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][12][tag_size: 1] && cache_overhead[setNumber][12][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 12;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[13] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][13][tag_size: 1] && cache_overhead[setNumber][13][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 13;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[14] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][14][tag_size: 1] && cache_overhead[setNumber][14][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 14;
+        end
+    end
+
+    always @(posedge (whichAlwaysBlocksToCall[15] && bhatia_on)) 
+    begin
+        if (incoming_tag == cache_overhead[setNumber][15][tag_size: 1] && cache_overhead[setNumber][15][0]) 
+        begin
+            hit = 1'b1;
+            hit_way = 15;
+        end
     end
 
     //TODO: look for how to execute variable no of comparators in parallel - NISHITA
-    always @(posedge bhatia_on) begin
-        for(integer p=0;p<input_way_no;p++) begin
-        if(incoming_tag == cache_overhead[setNumber][p][tag_size: 1]) 
-        begin
-            if(cache_overhead[setNumber][p][0])
-            begin
-                    hit = 1'b1;
-                    hit_way = p;
-            end
-        end
-        counter_variable = counter_variable+1;
-    end
-    if(counter_variable == input_way_no) counter_variable_bool=1'b1;
-    end
+    // always @(posedge bhatia_on) begin
+    //     for(integer p=0;p<input_way_no;p++) begin
+    //     if(incoming_tag == cache_overhead[setNumber][p][tag_size: 1]) 
+    //     begin
+    //         if(cache_overhead[setNumber][p][0])
+    //         begin
+    //                 hit = 1'b1;
+    //                 hit_way = p;
+    //         end
+    //     end
+    //     counter_variable = counter_variable+1;
+    // end
+    // if(counter_variable == input_way_no) counter_variable_bool=1'b1;
+    // end
 
     //replacement policy code
     //initially setting values
