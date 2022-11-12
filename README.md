@@ -1,1 +1,2 @@
-# CacheSimulator_CSN-221
+## CSN-221 Project
+Memory Project
