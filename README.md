@@ -29,9 +29,9 @@
 
 Configurations for the above Bar Graph:
 
-- Configuration 1:  32kB   64B   8 Ways
-- Configuration 2:  32kb   64B   Direct Mapped
-- Configuration 3:  16kB   64B   16 Ways
+- Configuration 1:  32kB(blockSize)   64B(setSize)   8 Ways
+- Configuration 2:  32kB(blockSize)   64B(setSize)   Direct Mapped
+- Configuration 3:  16kB(blockSize)   64B(setSize)   16 Ways
 
 ## Group members: 
 - Neha Gujar 21114039
