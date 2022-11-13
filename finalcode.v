@@ -1,11 +1,11 @@
 module cache;
     //blockOffset = no of bits of block offset 
     //way_no - decimal, set_no_bits - taking bits cuz we assume log(set_no) = integer in base 2
-    parameter blockOffset_bits = 3, input_way_no = 4, set_no_bits = 3, no_of_requests = 524;//blockOffset in number of bits format
+    parameter blockOffset_bits = 3, input_way_no = 4, set_no_bits = 3, no_of_requests = 41832;//blockOffset in number of bits format
     parameter total_set_no=2**set_no_bits; //decimal format
     parameter tag_size = 24-blockOffset_bits-set_no_bits; //no of bits required for tag + 1 valid bit
 
-    reg hit; //1 - current request is hit; 0 - current request is a miss
+    reg hit = 1'b0; //1 - current request is hit; 0 - current request is a miss
     reg bhatia_on, bit, dummy_enable; //bit - internal var of Replacement_Policy, bhatia_on - will be 1 whenever comparators have to be called
     reg [23: 0] address; //address accessed by current request
     reg counter_variable_bool=1'b0; //1 - all comparators have compared the tags
@@ -27,11 +27,11 @@ module cache;
     reg requests_loaded = 1'b0;//tells if requests have been read from our trace 
     integer file, line_num, a; //variables required for reading from memory file
     reg [24:0] all_queries [0: (no_of_requests - 1)]; //query size = read/write bool(1 bit) + address (24 bit)
-    reg whichAlwaysBlocksToCall [15:0]; //16 bit register - the i'th comparator will be called on posedge of the i'th bit
+    reg [15:0] whichAlwaysBlocksToCall = 16'b0000000000000000; //16 bit register - the i'th comparator will be called on posedge of the i'th bit
 
     //reading requests
     initial begin
-        file = $fopen("sort.txt", "r"); //change name of file according to the trace
+        file = $fopen("lu.txt", "r"); //change name of file according to the trace
         line_num = 0;
         while(! $feof(file))
             begin
@@ -40,10 +40,6 @@ module cache;
             end 
         requests_loaded=1'b1;
         hit=1'b0;
-        for (integer x = 0; x < 16; x = x + 1) 
-        begin
-            whichAlwaysBlocksToCall[x] = 1'b0;
-        end
     end
 
     //code to read each request
@@ -282,40 +278,36 @@ always @(posedge (whichAlwaysBlocksToCall[5] && bhatia_on))
     begin
         counter_variable=0;
         counter_variable_bool=1'b0;
-        $display("Request number:",request_num); 
+        $display("Request number:",request_num + 1); 
         request_num = request_num + 1;
         $display("Set number is ",setNumber, " Hit way is ",hit_way," Incoming tag is %b",incoming_tag );
-        $display("hit:",hit);
         bhatia_on = 1'b0;
         if (hit == 1'b1)begin
             hits = hits + 1;
-            $display("It's a hit. Number of hits now are: %0d", hits);
+            $display("It's a hit");
             blockToBeReplaced <= Replacement_Policy(setNumber, hit_way, 1'b1);
             if (write == 1'b1) begin
                 //write
-                $display("Data is written. Write Hit request is served");
-                $display("Cache write hit block %b",cache_overhead[setNumber][hit_way]);
+                $display("Write Hit request is served");
                 processRequest = 1'b1; //this will be at end
             end
             else begin
                 //read
-                $display("Read data is %b\nRead Hit request is served",cache_overhead[setNumber][hit_way]);
+                $display("Read Hit request is served");
                 processRequest = 1'b1; //this will be at end
             end
             hit=1'b0;
         end
         else begin
             misses = misses + 1;
-            $display("Its a miss. Number of misses now are: %0d", misses);
+            $display("Its a miss");
             blockToBeReplaced <= Replacement_Policy(setNumber, hit_way, 1'b0);
-            $display("block to be replaced: ",replaceBlockNum);
+            $display("way no of block to be replaced: %0d Outgoing tag: %b", replaceBlockNum, cache_overhead[setNumber][replaceBlockNum][tag_size:1]);
             cache_overhead[setNumber][replaceBlockNum][0:0] = 1'b1; //setting the valid bit
             cache_overhead[setNumber][replaceBlockNum][(tag_size):1] = incoming_tag[(tag_size-1):0]; //tag size
-            $display("Set number: ",setNumber," block to be replaced: ",replaceBlockNum," tag",incoming_tag);
-            $display("Cache miss block %b",cache_overhead[setNumber][replaceBlockNum]);
             if (write == 1'b1) begin
                 //write
-                $display("Write Miss request is served %b",cache_overhead[setNumber][replaceBlockNum]);
+                $display("Write Miss request is served ");
                 processRequest = 1'b1; //this will be at end
             end
             else begin
@@ -324,9 +316,12 @@ always @(posedge (whichAlwaysBlocksToCall[5] && bhatia_on))
                 processRequest = 1'b1; //this will be at end
             end
         end
+        begin
+            $display("Current no of hits = %0d and misses = %0d", hits, misses);
+        end
         if (request_num == no_of_requests) 
         begin
-            $finish;
+            #2 $finish;
         end
     end
 endmodule
